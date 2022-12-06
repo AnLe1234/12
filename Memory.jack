@@ -7,28 +7,79 @@
  * This library provides two services: direct access to the computer's main
  * memory (RAM), and allocation and recycling of memory blocks. The Hack RAM
  * consists of 32,768 words, each holding a 16-bit binary number.
- */ 
+ */
 class Memory {
+    static Array memory;
+    static Array heap;
+    static Array freeList;
+
+    static int heapLen;
 
     /** Initializes the class. */
     function void init() {
+        let memory = 0;
+        let heapLen = 14334;
+        let heap = 2048;
+
+        let freeList = heap;
+        let freeList[0] = 0;
+        let freeList[1] = heapLen;
+
+        return;
+
     }
 
     /** Returns the RAM value at the given address. */
     function int peek(int address) {
+        return memory[address];
     }
 
     /** Sets the RAM value at the given address to the given value. */
     function void poke(int address, int value) {
+        let memory[address] = value;
+        return;
     }
 
     /** Finds an available RAM block of the given size and returns
      *  a reference to its base address. */
     function int alloc(int size) {
+        var Array segment, selSeg, block, prevSeg;
+        var int diff, minDiff;
+        var boolean found;
+
+        if (size > (heapLen - 2)) {
+            do Sys.error(6);
+        }
+
+
+        let segment = freeList;
+        let selSeg = segment;
+        let prevSeg = null;
+        let minDiff = segment[0] - size - 2;
+
+        while (~(segment[1] = null)) {
+            let diff = segment[0] - size - 2;
+            if ((diff > -1) & (diff < minDiff)) {
+                let minDiff = diff;
+                let selSeg = segment;
+            }
+            let prevSeg = segment;
+            let segment = segment[1];
+        }
+        let selSeg[minDiff+1] = size + 1;
+        let block = selSeg + selSeg[0] - size;
+        let selSeg[0] = 1 + minDiff;
+
+        return block;
     }
 
     /** De-allocates the given object (cast as an array) by making
      *  it available for future allocations. */
     function void deAlloc(Array o) {
-    }    
+        var Array segment;
+        let segment = o - 1;
+        let segment[1] = freeList;
+        let freeList = segment;
+        return;
+    }
 }

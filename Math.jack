@@ -100,13 +100,13 @@ class Math {
     function int sqrt(int x) {
         var int y, j, approx, approxSq;
         let y = 0;
-        let j = 7;
+        let j = 7;  // n/2 - 1
 
         while (j > 0) {
             let approx = y + bitArray[j];
             let approxSq = approx *approx;
 
-            if ((approxSq < x) & (approxSq > 0)) {
+            if ((approxSq < x) | (approxSq = 0)) {
                 let y = approx;
             }
             let j = j - 1;
